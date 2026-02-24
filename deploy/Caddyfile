@@ -1,9 +1,17 @@
 {
 	email {$ACME_EMAIL}
+	default_sni {$LAN_IP:192.168.1.158}
 }
 
 # Local smoke-test endpoint (self-managed local CA cert).
 localhost, 127.0.0.1 {
+	encode zstd gzip
+	tls internal
+	reverse_proxy app:3000
+}
+
+# LAN endpoint (self-managed local CA cert).
+{$LAN_IP:192.168.1.158} {
 	encode zstd gzip
 	tls internal
 	reverse_proxy app:3000
