@@ -3,6 +3,7 @@
 .next-dev
 .next-dev-local
 certificates
+deploy-keys
 node_modules
 playwright-report
 test-results
