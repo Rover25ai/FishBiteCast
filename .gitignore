@@ -1,0 +1,15 @@
+.next
+.next-e2e
+.next-dev
+certificates
+node_modules
+playwright-report
+test-results
+coverage
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env.local
+.env.production

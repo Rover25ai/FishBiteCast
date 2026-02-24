@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="fishbitecast.com icon large">
+  <defs>
+    <linearGradient id="bg2" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#219ebc"/>
+      <stop offset="1" stop-color="#023047"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg2)"/>
+  <path d="M72 279c53 0 92-39 129-39 32 0 49 20 84 20 39 0 54-35 93-35 30 0 49 13 64 27-22 39-61 65-103 65-35 0-55-22-82-22-31 0-65 39-121 39-30 0-52-8-64-16z" fill="#8ecae6"/>
+  <path d="M384 120c0 24-20 44-44 44 24 0 44 20 44 44 0-24 20-44 44-44-24 0-44-20-44-44z" fill="#ffb703"/>
+  <circle cx="254" cy="254" r="12" fill="#ff7d00"/>
+</svg>
