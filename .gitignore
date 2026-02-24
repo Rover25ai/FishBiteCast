@@ -1,6 +1,7 @@
 .next
 .next-e2e
 .next-dev
+.next-dev-local
 certificates
 node_modules
 playwright-report
