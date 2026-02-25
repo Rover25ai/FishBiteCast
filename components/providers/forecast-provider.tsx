@@ -82,14 +82,21 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
   const [isOffline, setIsOffline] = useState<boolean>(typeof navigator !== 'undefined' ? !navigator.onLine : false);
 
   const refreshDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshRequestIdRef = useRef(0);
 
   const refreshNow = useCallback(
     async (target: LocationInfo) => {
+      const requestId = ++refreshRequestIdRef.current;
+
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        if (requestId !== refreshRequestIdRef.current) {
+          return;
+        }
+
         setIsOffline(true);
         setLoading(false);
 
-        if (!result) {
+        if (!loadCachedForecast()) {
           setError('Offline and no cached forecast is available yet. Connect and retry.');
         }
 
@@ -107,18 +114,28 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
           settings,
         });
 
+        if (requestId !== refreshRequestIdRef.current) {
+          return;
+        }
+
         setWeather(fetchedWeather);
         setResult(scored);
         setLocation(scored.location);
         saveLastLocation(scored.location);
         saveCachedForecast(fetchedWeather, scored);
       } catch (err) {
+        if (requestId !== refreshRequestIdRef.current) {
+          return;
+        }
+
         setError(err instanceof Error ? err.message : 'Could not load forecast.');
       } finally {
-        setLoading(false);
+        if (requestId === refreshRequestIdRef.current) {
+          setLoading(false);
+        }
       }
     },
-    [result, settings],
+    [settings],
   );
 
   const queueRefresh = useCallback(
@@ -126,6 +143,9 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
       if (refreshDebounceRef.current) {
         clearTimeout(refreshDebounceRef.current);
       }
+
+      // Invalidate any in-flight request so only the newest selected location can win.
+      refreshRequestIdRef.current += 1;
 
       setLocation(target);
       setLoading(true);
@@ -137,6 +157,12 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
     },
     [refreshNow],
   );
+
+  const queueRefreshRef = useRef(queueRefresh);
+
+  useEffect(() => {
+    queueRefreshRef.current = queueRefresh;
+  }, [queueRefresh]);
 
   const useMyLocation = useCallback(async () => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
@@ -257,10 +283,12 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
       setLocation(lastLocation);
 
       if (typeof navigator !== 'undefined' && navigator.onLine) {
-        queueRefresh(lastLocation);
+        queueRefreshRef.current(lastLocation);
       }
     }
+  }, []);
 
+  useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const onOnline = () => setIsOffline(false);
@@ -276,7 +304,7 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
         clearTimeout(refreshDebounceRef.current);
       }
     };
-  }, [queueRefresh]);
+  }, []);
 
   useEffect(() => {
     if (!weather || !location) return;
