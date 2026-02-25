@@ -71,6 +71,14 @@ function isLocationInfo(value: unknown): value is LocationInfo {
   );
 }
 
+function sameCoordinates(aLat: number, aLng: number, bLat: number, bLng: number): boolean {
+  return Math.abs(aLat - bLat) <= 0.02 && Math.abs(aLng - bLng) <= 0.02;
+}
+
+function sameLocation(a: LocationInfo, b: LocationInfo): boolean {
+  return sameCoordinates(a.latitude, a.longitude, b.latitude, b.longitude);
+}
+
 export function ForecastProvider({ children }: { children: ReactNode }): JSX.Element {
   const { settings } = useSettings();
 
@@ -147,7 +155,9 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
       // Invalidate any in-flight request so only the newest selected location can win.
       refreshRequestIdRef.current += 1;
 
+      saveLastLocation(target);
       setLocation(target);
+      setResult(null);
       setLoading(true);
       setError(null);
 
@@ -269,22 +279,25 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
 
   useEffect(() => {
     const cached = loadCachedForecast();
+    const cachedLocation = isLocationInfo(cached?.result?.location) ? cached.result.location : null;
+    const rememberedLocation = loadLastLocation();
+    const initialLocation = rememberedLocation ?? cachedLocation;
 
-    if (cached) {
+    // Hydrate from cache only when it matches the best-known location.
+    if (cached && cachedLocation && initialLocation && sameLocation(cachedLocation, initialLocation)) {
       setWeather(cached.weather);
-      if (isLocationInfo(cached.result?.location)) {
-        setLocation(cached.result.location);
-      }
+      setResult(cached.result);
+      setLocation(cachedLocation);
+    } else if (!initialLocation && cached && cachedLocation) {
+      setWeather(cached.weather);
+      setResult(cached.result);
+      setLocation(cachedLocation);
+    } else if (initialLocation) {
+      setLocation(initialLocation);
     }
 
-    const cachedLocation = isLocationInfo(cached?.result?.location) ? cached.result.location : null;
-    const lastLocation = cachedLocation ?? loadLastLocation();
-    if (lastLocation) {
-      setLocation(lastLocation);
-
-      if (typeof navigator !== 'undefined' && navigator.onLine) {
-        queueRefreshRef.current(lastLocation);
-      }
+    if (initialLocation && typeof navigator !== 'undefined' && navigator.onLine) {
+      queueRefreshRef.current(initialLocation);
     }
   }, []);
 
@@ -308,6 +321,9 @@ export function ForecastProvider({ children }: { children: ReactNode }): JSX.Ele
 
   useEffect(() => {
     if (!weather || !location) return;
+    if (!sameCoordinates(weather.latitude, weather.longitude, location.latitude, location.longitude)) {
+      return;
+    }
 
     try {
       const recomputed = buildForecastScore({
