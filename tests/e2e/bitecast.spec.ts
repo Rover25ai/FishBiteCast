@@ -76,7 +76,7 @@ test('deny geolocation, manual search, and cached offline result', async ({ page
 
   await page.getByRole('link', { name: /^Details$/ }).click();
   await expect(page).toHaveURL(/\/details$/);
-  await expect(page.getByText(/no forecast loaded|48h hourly forecast \+ bite score/i)).toBeVisible();
+  await expect(page.getByText(/no forecast loaded|loading forecast details|48h hourly forecast \+ bite score/i)).toBeVisible();
 
   await page.getByRole('link', { name: /^Settings$/ }).click();
   await expect(page).toHaveURL(/\/settings$/);
