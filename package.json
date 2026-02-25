@@ -1,10 +1,10 @@
 {
-  "name": "bitecast",
+  "name": "fishbitecast",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --experimental-https --experimental-https-key ./certificates/localhost-key.pem --experimental-https-cert ./certificates/localhost.pem --port 3010",
     "build": "next build",
+    "dev": "next dev --experimental-https --experimental-https-key ./certificates/localhost-key.pem --experimental-https-cert ./certificates/localhost.pem --port 3010",
     "start": "next start --port 3010",
     "start:prod": "next start --hostname 0.0.0.0 --port 3000",
     "tls:up": "docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build",
@@ -12,9 +12,14 @@
     "tls:logs": "docker compose --env-file .env.production -f docker-compose.prod.yml logs -f caddy app",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.17.1",
     "next": "^16.1.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -30,6 +35,7 @@
     "postcss": "8.4.47",
     "tailwindcss": "3.4.13",
     "typescript": "5.6.3",
-    "vitest": "2.1.2"
+    "vitest": "2.1.2",
+    "wrangler": "^4.68.1"
   }
 }

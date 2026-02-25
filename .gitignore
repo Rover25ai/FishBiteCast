@@ -15,3 +15,8 @@ yarn-error.log*
 pnpm-debug.log*
 .env.local
 .env.production
+
+# OpenNext
+.open-next
+.dev.vars
+.wrangler
