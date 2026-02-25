@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "postbuild": "if [ -z \"${OPENNEXT_INTERNAL_BUILD:-}\" ]; then OPENNEXT_INTERNAL_BUILD=1 opennextjs-cloudflare build; fi",
     "dev": "next dev --experimental-https --experimental-https-key ./certificates/localhost-key.pem --experimental-https-cert ./certificates/localhost.pem --port 3010",
     "start": "next start --port 3010",
     "start:prod": "next start --hostname 0.0.0.0 --port 3000",
