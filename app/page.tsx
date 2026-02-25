@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import { BestWindowsCard } from '@/components/best-windows-card';
 import { ErrorState } from '@/components/error-state';
 import { ForecastSkeleton } from '@/components/forecast-skeleton';
@@ -47,9 +45,9 @@ export default function HomePage(): JSX.Element {
               {loading ? 'Refreshing...' : 'Refresh Forecast'}
             </button>
             <p className="helper-text">Last updated: {new Date(result.summary.lastUpdatedIso).toLocaleString()}</p>
-            <Link href="/details" className="link-pill">
+            <a href="/details" className="link-pill">
               View details
-            </Link>
+            </a>
           </section>
 
           {error ? <p className="helper-text">Latest fetch issue: {error}</p> : null}
