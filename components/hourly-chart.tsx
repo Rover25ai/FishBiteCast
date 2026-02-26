@@ -95,6 +95,12 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
       const nextWidth = Math.round(chartWrapRef.current?.getBoundingClientRect().width ?? 0);
       if (nextWidth > 0) {
         setChartWidth(nextWidth);
+        return;
+      }
+
+      // Safari can transiently report zero during route transitions.
+      if (typeof window !== 'undefined') {
+        setChartWidth(Math.max(window.innerWidth - 28, 280));
       }
     };
 
@@ -108,11 +114,13 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
 
     window.addEventListener('resize', updateChartWidth);
     window.addEventListener('orientationchange', updateChartWidth);
+    window.visualViewport?.addEventListener('resize', updateChartWidth);
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener('resize', updateChartWidth);
       window.removeEventListener('orientationchange', updateChartWidth);
+      window.visualViewport?.removeEventListener('resize', updateChartWidth);
       resizeObserver?.disconnect();
     };
   }, []);
@@ -143,7 +151,8 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
     );
   }
 
-  const width = Math.max(chartWidth, 320);
+  const fallbackWidth = typeof window === 'undefined' ? 360 : Math.max(window.innerWidth - 28, 280);
+  const width = Math.max(chartWidth, fallbackWidth);
   const height = width <= 380 ? 286 : width <= 520 ? 320 : 360;
   const compact = width <= 520;
   const margin = {
@@ -208,67 +217,63 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
       <h2 className="section-title">48h Hourly Forecast + Bite Score</h2>
       <p className="chart-kicker">Amber shading marks major solunar windows. Mint shading marks minor windows.</p>
       <div className="chart-wrap" ref={chartWrapRef}>
-        {chartWidth > 0 ? (
-          <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="48 hour hourly fishing forecast chart">
-            <defs>
-              <linearGradient id="rainFillNative" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#45b9de" stopOpacity="0.44" />
-                <stop offset="100%" stopColor="#45b9de" stopOpacity="0.08" />
-              </linearGradient>
-            </defs>
+        <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="48 hour hourly fishing forecast chart">
+          <defs>
+            <linearGradient id="rainFillNative" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#45b9de" stopOpacity="0.44" />
+              <stop offset="100%" stopColor="#45b9de" stopOpacity="0.08" />
+            </linearGradient>
+          </defs>
 
-            {scoreTicks.map((tick) => (
-              <line key={`grid-${tick.value}`} x1={margin.left} x2={width - margin.right} y1={tick.y} y2={tick.y} stroke="#8db6c540" strokeDasharray="4 4" />
-            ))}
+          {scoreTicks.map((tick) => (
+            <line key={`grid-${tick.value}`} x1={margin.left} x2={width - margin.right} y1={tick.y} y2={tick.y} stroke="#8db6c540" strokeDasharray="4 4" />
+          ))}
 
-            {solunarInChartRange.map((window) => {
-              const x1 = xFor(Math.max(window.startEpoch, startEpoch));
-              const x2 = xFor(Math.min(window.endEpoch, endEpoch));
-              return (
-                <rect
-                  key={`${window.type}-${window.peakEpoch}`}
-                  x={Math.min(x1, x2)}
-                  y={margin.top}
-                  width={Math.max(Math.abs(x2 - x1), 1)}
-                  height={innerHeight}
-                  fill={window.type === 'major' ? '#ffbf6982' : '#98f5b082'}
-                />
-              );
-            })}
+          {solunarInChartRange.map((window) => {
+            const x1 = xFor(Math.max(window.startEpoch, startEpoch));
+            const x2 = xFor(Math.min(window.endEpoch, endEpoch));
+            return (
+              <rect
+                key={`${window.type}-${window.peakEpoch}`}
+                x={Math.min(x1, x2)}
+                y={margin.top}
+                width={Math.max(Math.abs(x2 - x1), 1)}
+                height={innerHeight}
+                fill={window.type === 'major' ? '#ffbf6982' : '#98f5b082'}
+              />
+            );
+          })}
 
-            <path d={rainArea} fill="url(#rainFillNative)" stroke="#2b9ec4" strokeWidth={compact ? '1.2' : '1.4'} />
-            <path d={scoreLine} fill="none" stroke="#ee8a03" strokeWidth={compact ? '2.8' : '3.2'} strokeLinecap="round" />
-            <path d={tempLine} fill="none" stroke="#028090" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
-            <path d={windLine} fill="none" stroke="#003049" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
+          <path d={rainArea} fill="url(#rainFillNative)" stroke="#2b9ec4" strokeWidth={compact ? '1.2' : '1.4'} />
+          <path d={scoreLine} fill="none" stroke="#ee8a03" strokeWidth={compact ? '2.8' : '3.2'} strokeLinecap="round" />
+          <path d={tempLine} fill="none" stroke="#028090" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
+          <path d={windLine} fill="none" stroke="#003049" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
 
-            <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
-            <line x1={width - margin.right} x2={width - margin.right} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
-            <line x1={margin.left} x2={width - margin.right} y1={height - margin.bottom} y2={height - margin.bottom} stroke="#6f92a2" />
+          <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
+          <line x1={width - margin.right} x2={width - margin.right} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
+          <line x1={margin.left} x2={width - margin.right} y1={height - margin.bottom} y2={height - margin.bottom} stroke="#6f92a2" />
 
-            {scoreTicks.map((tick) => (
-              <text key={`left-${tick.value}`} x={margin.left - 8} y={tick.y + 4} textAnchor="end" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
-                {tick.value}
+          {scoreTicks.map((tick) => (
+            <text key={`left-${tick.value}`} x={margin.left - 8} y={tick.y + 4} textAnchor="end" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
+              {tick.value}
+            </text>
+          ))}
+
+          {rightTicks.map((tick, index) => (
+            <text key={`right-${index}`} x={width - margin.right + 8} y={tick.y + 4} textAnchor="start" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
+              {tick.value.toFixed(1)}
+            </text>
+          ))}
+
+          {xTicks.map((tick, index) => (
+            <g key={`x-${index}`}>
+              <line x1={tick.x} x2={tick.x} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke="#6f92a2" />
+              <text x={tick.x} y={height - margin.bottom + (compact ? 16 : 18)} textAnchor="middle" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
+                {tick.label}
               </text>
-            ))}
-
-            {rightTicks.map((tick, index) => (
-              <text key={`right-${index}`} x={width - margin.right + 8} y={tick.y + 4} textAnchor="start" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
-                {tick.value.toFixed(1)}
-              </text>
-            ))}
-
-            {xTicks.map((tick, index) => (
-              <g key={`x-${index}`}>
-                <line x1={tick.x} x2={tick.x} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke="#6f92a2" />
-                <text x={tick.x} y={height - margin.bottom + (compact ? 16 : 18)} textAnchor="middle" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
-                  {tick.label}
-                </text>
-              </g>
-            ))}
-          </svg>
-        ) : (
-          <p className="helper-text">Preparing chart...</p>
-        )}
+            </g>
+          ))}
+        </svg>
       </div>
       <div className="chart-legend" aria-hidden>
         <span><i className="legend-dot legend-score" /> Bite Score</span>

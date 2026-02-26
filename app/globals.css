@@ -24,6 +24,15 @@
   box-sizing: border-box;
 }
 
+img,
+svg {
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
 html {
   max-width: 100%;
   overflow-x: hidden;
@@ -152,11 +161,17 @@ body::before {
 
 .main-content {
   animation: fade-in 280ms ease;
+  min-width: 0;
 }
 
 .page-stack {
   display: grid;
   gap: 1.05rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.page-stack > * {
+  min-width: 0;
 }
 
 .hero-banner {
@@ -244,6 +259,7 @@ body::before {
   border: 1px solid #d8eaf2;
   border-radius: 1.06rem;
   padding: clamp(0.75rem, 2.6vw, 1rem);
+  min-width: 0;
   box-shadow:
     0 12px 24px rgba(2, 48, 71, 0.11),
     inset 0 1px 0 #ffffffcc;
@@ -418,6 +434,7 @@ body::before {
   grid-auto-flow: column;
   grid-auto-columns: minmax(110px, 1fr);
   gap: 0.6rem;
+  width: 100%;
   overflow-x: auto;
   padding-bottom: 0.2rem;
 }
