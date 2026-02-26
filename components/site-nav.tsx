@@ -4,7 +4,8 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/details', label: 'Details' },
+  { href: '/details', label: '48 Hour Forecast' },
+  { href: '/weekly', label: 'Weekly Forecast' },
 ];
 
 export function SiteNav(): JSX.Element {

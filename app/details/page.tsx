@@ -30,7 +30,7 @@ export default function DetailsPage(): JSX.Element {
     if (loading) {
       return (
         <section className="card">
-          <h2 className="section-title">Loading forecast details</h2>
+          <h2 className="section-title">Loading 48 hour forecast</h2>
           <p className="helper-text">Fetching latest data for this location…</p>
         </section>
       );

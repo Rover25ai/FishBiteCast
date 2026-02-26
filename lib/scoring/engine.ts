@@ -328,7 +328,7 @@ export function buildForecastScore({ forecast, location, settings, config = DEFA
   const t = config.thresholds;
 
   const limit = Math.min(
-    48,
+    24 * 7,
     forecast.hourly.time.length,
     forecast.hourly.temperature2m.length,
     forecast.hourly.precipitationProbability.length,

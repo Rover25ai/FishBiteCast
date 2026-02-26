@@ -98,7 +98,7 @@ export async function fetchWeatherForecast(latitude: number, longitude: number):
   const params = new URLSearchParams({
     latitude: latitude.toFixed(5),
     longitude: longitude.toFixed(5),
-    forecast_days: '3',
+    forecast_days: '7',
     timezone: 'auto',
     timeformat: 'unixtime',
     hourly:

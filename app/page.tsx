@@ -71,7 +71,28 @@ export default function HomePage(): JSX.Element {
                 router.push('/details');
               }}
             >
-              View details
+              48 Hour Forecast
+            </a>
+            <a
+              href="/weekly"
+              className="link-pill"
+              onClick={(event) => {
+                if (
+                  event.defaultPrevented ||
+                  event.button !== 0 ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                router.push('/weekly');
+              }}
+            >
+              Weekly Forecast
             </a>
           </section>
 
