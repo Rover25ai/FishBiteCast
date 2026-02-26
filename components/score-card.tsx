@@ -1,15 +1,15 @@
 import type { ForecastResult } from '@/types/forecast';
 
-const ratingTone: Record<ForecastResult['summary']['rating'], string> = {
-  Poor: 'tone-poor',
-  Fair: 'tone-fair',
-  Good: 'tone-good',
-  Great: 'tone-great',
-  Epic: 'tone-epic',
-};
+function toneForScore(score: number): string {
+  if (score < 30) return 'tone-poor';
+  if (score < 50) return 'tone-fair';
+  if (score < 70) return 'tone-good';
+  if (score < 85) return 'tone-great';
+  return 'tone-epic';
+}
 
 export function ScoreCard({ result }: { result: ForecastResult }): JSX.Element {
-  const toneClass = ratingTone[result.summary.rating];
+  const toneClass = toneForScore(result.summary.totalScore);
 
   return (
     <section className={`card score-card ${toneClass}`}>

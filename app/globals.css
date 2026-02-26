@@ -375,12 +375,57 @@ body::before {
   background: linear-gradient(145deg, #ffffff, #f0fbff);
 }
 
+.score-card.tone-poor {
+  background: linear-gradient(145deg, #fff6f5, #ffd8d5);
+  border-color: #efb7b2;
+}
+
+.score-card.tone-fair {
+  background: linear-gradient(145deg, #fffaf1, #ffe4b8);
+  border-color: #eccd96;
+}
+
+.score-card.tone-good {
+  background: linear-gradient(145deg, #f4fff8, #d2f2e2);
+  border-color: #9fd8bc;
+}
+
+.score-card.tone-great {
+  background: linear-gradient(145deg, #f2fbff, #cdeafb);
+  border-color: #9ccde8;
+}
+
+.score-card.tone-epic {
+  background: linear-gradient(145deg, #effff7, #c4f0d8);
+  border-color: #8dd0ad;
+}
+
 .score-value {
   font-family: var(--font-display), sans-serif;
   font-size: clamp(2.7rem, 7vw, 4.2rem);
   line-height: 0.95;
   color: var(--accent-3);
   text-shadow: 0 6px 14px rgba(3, 48, 73, 0.08);
+}
+
+.score-card.tone-poor .score-value {
+  color: #9c1f1a;
+}
+
+.score-card.tone-fair .score-value {
+  color: #9a5a00;
+}
+
+.score-card.tone-good .score-value {
+  color: #126847;
+}
+
+.score-card.tone-great .score-value {
+  color: #0c4f7a;
+}
+
+.score-card.tone-epic .score-value {
+  color: #0f5c3a;
 }
 
 .score-rating {
