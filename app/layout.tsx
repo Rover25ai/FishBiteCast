@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
             <header className="site-header">
               <div className="brand-block">
                 <span className="brand-mark" aria-hidden>
-                  <img src="/images/image2.png" alt="" className="brand-logo" />
+                  FB
                 </span>
                 <div>
                   <p className="brand-kicker">Freshwater Forecast</p>
