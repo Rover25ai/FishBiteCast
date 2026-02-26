@@ -24,7 +24,6 @@ export default function HomePage(): JSX.Element {
     <div className="page-stack">
       <HeroBanner />
       <LocationControls />
-      <SettingsForm />
 
       {isOffline && result ? <OfflineBanner lastUpdated={result.summary.lastUpdatedIso} /> : null}
 
@@ -34,8 +33,11 @@ export default function HomePage(): JSX.Element {
 
       {result ? (
         <>
-          <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <ScoreCard result={result} />
+          <ScoreCard result={result} />
+
+          <SettingsForm />
+
+          <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <BestWindowsCard result={result} />
             <WhyCard result={result} />
             <MoonWidget result={result} />
@@ -75,7 +77,9 @@ export default function HomePage(): JSX.Element {
 
           {error ? <p className="helper-text">Latest fetch issue: {error}</p> : null}
         </>
-      ) : null}
+      ) : (
+        <SettingsForm />
+      )}
 
       {!loading && !result && !error ? <p className="helper-text">Pick a location to generate your first forecast.</p> : null}
     </div>

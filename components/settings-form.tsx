@@ -22,19 +22,20 @@ export function SettingsForm(): JSX.Element {
       <p className="helper-text">Forecast scores use imperial units site-wide.</p>
       <fieldset className="field-group">
         <legend className="helper-text">Preset adjusts scoring weights.</legend>
-
-        {speciesOptions.map((option) => (
-          <label key={option.id} className="field-option">
-            <input
-              type="radio"
-              name="species"
-              value={option.id}
-              checked={settings.species === option.id}
-              onChange={() => setSpecies(option.id)}
-            />
-            <span>{option.label}</span>
-          </label>
-        ))}
+        <div className="species-grid">
+          {speciesOptions.map((option) => (
+            <label key={option.id} className="field-option">
+              <input
+                type="radio"
+                name="species"
+                value={option.id}
+                checked={settings.species === option.id}
+                onChange={() => setSpecies(option.id)}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
       </fieldset>
     </section>
   );
