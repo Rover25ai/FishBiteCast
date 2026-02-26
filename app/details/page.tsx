@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { FactorBreakdown } from '@/components/factor-breakdown';
 import { HourlyChart } from '@/components/hourly-chart';
 import { useForecast } from '@/components/providers/forecast-provider';
+import { WeatherStrip } from '@/components/weather-strip';
 
 export default function DetailsPage(): JSX.Element {
   const router = useRouter();
@@ -76,6 +77,7 @@ export default function DetailsPage(): JSX.Element {
     <div className="page-stack">
       <HourlyChart result={result} />
       <FactorBreakdown result={result} />
+      <WeatherStrip result={result} />
     </div>
   );
 }
