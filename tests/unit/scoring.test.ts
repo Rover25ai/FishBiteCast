@@ -38,7 +38,7 @@ describe('buildForecastScore', () => {
     const score = buildForecastScore({
       forecast,
       location,
-      settings: { units: 'imperial', species: 'bass' },
+      settings: { species: 'bass' },
     });
 
     expect(score.summary.totalScore).toBeGreaterThan(60);
@@ -58,7 +58,7 @@ describe('buildForecastScore', () => {
     const score = buildForecastScore({
       forecast,
       location,
-      settings: { units: 'imperial', species: 'bass' },
+      settings: { species: 'bass' },
     });
 
     expect(score.summary.totalScore).toBeLessThan(45);
@@ -71,14 +71,14 @@ describe('buildForecastScore', () => {
     const scoreA = buildForecastScore({
       forecast: stable,
       location,
-      settings: { units: 'imperial', species: 'catfish' },
+      settings: { species: 'catfish' },
       now: new Date('2024-01-11T10:00:00.000Z'),
     });
 
     const scoreB = buildForecastScore({
       forecast: stable,
       location,
-      settings: { units: 'imperial', species: 'catfish' },
+      settings: { species: 'catfish' },
       now: new Date('2024-01-25T10:00:00.000Z'),
     });
 

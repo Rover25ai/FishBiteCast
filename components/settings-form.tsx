@@ -14,58 +14,28 @@ const speciesOptions = [
 ] as const;
 
 export function SettingsForm(): JSX.Element {
-  const { settings, setUnits, setSpecies } = useSettings();
+  const { settings, setSpecies } = useSettings();
 
   return (
-    <section className="settings-grid">
-      <article className="card">
-        <h2 className="section-title">Units</h2>
-        <fieldset className="field-group">
-          <legend className="helper-text">Choose display units</legend>
+    <section className="card">
+      <h2 className="section-title">Species Preset</h2>
+      <p className="helper-text">Forecast scores use imperial units site-wide.</p>
+      <fieldset className="field-group">
+        <legend className="helper-text">Preset adjusts scoring weights.</legend>
 
-          <label className="field-option">
+        {speciesOptions.map((option) => (
+          <label key={option.id} className="field-option">
             <input
               type="radio"
-              name="units"
-              value="imperial"
-              checked={settings.units === 'imperial'}
-              onChange={() => setUnits('imperial')}
+              name="species"
+              value={option.id}
+              checked={settings.species === option.id}
+              onChange={() => setSpecies(option.id)}
             />
-            <span>Imperial (°F, mph, inHg)</span>
+            <span>{option.label}</span>
           </label>
-
-          <label className="field-option">
-            <input
-              type="radio"
-              name="units"
-              value="metric"
-              checked={settings.units === 'metric'}
-              onChange={() => setUnits('metric')}
-            />
-            <span>Metric (°C, km/h, hPa)</span>
-          </label>
-        </fieldset>
-      </article>
-
-      <article className="card">
-        <h2 className="section-title">Species Preset</h2>
-        <fieldset className="field-group">
-          <legend className="helper-text">Preset adjusts scoring weights.</legend>
-
-          {speciesOptions.map((option) => (
-            <label key={option.id} className="field-option">
-              <input
-                type="radio"
-                name="species"
-                value={option.id}
-                checked={settings.species === option.id}
-                onChange={() => setSpecies(option.id)}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
-        </fieldset>
-      </article>
+        ))}
+      </fieldset>
     </section>
   );
 }

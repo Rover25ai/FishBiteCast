@@ -306,7 +306,7 @@ export function buildForecastScore({ forecast, location, settings, config = DEFA
 
   return {
     location,
-    units: settings.units,
+    units: 'imperial',
     species: settings.species,
     timezone: forecast.timezone,
     fetchedAt: forecast.fetchedAt,

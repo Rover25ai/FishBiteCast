@@ -4,12 +4,11 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 import { DEFAULT_SETTINGS } from '@/lib/constants';
 import { loadSettings, saveSettings } from '@/lib/storage';
-import type { SpeciesPreset, UnitSystem, UserSettings } from '@/types/settings';
+import type { SpeciesPreset, UserSettings } from '@/types/settings';
 
 interface SettingsContextValue {
   settings: UserSettings;
   hydrated: boolean;
-  setUnits: (units: UnitSystem) => void;
   setSpecies: (species: SpeciesPreset) => void;
 }
 
@@ -25,14 +24,6 @@ export function SettingsProvider({ children }: { children: ReactNode }): JSX.Ele
     setHydrated(true);
   }, []);
 
-  const setUnits = (units: UnitSystem): void => {
-    setSettings((prev) => {
-      const next = { ...prev, units };
-      saveSettings(next);
-      return next;
-    });
-  };
-
   const setSpecies = (species: SpeciesPreset): void => {
     setSettings((prev) => {
       const next = { ...prev, species };
@@ -45,7 +36,6 @@ export function SettingsProvider({ children }: { children: ReactNode }): JSX.Ele
     () => ({
       settings,
       hydrated,
-      setUnits,
       setSpecies,
     }),
     [hydrated, settings],

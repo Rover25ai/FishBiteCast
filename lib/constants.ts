@@ -7,7 +7,6 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  units: 'imperial',
   species: 'bass',
 };
 

@@ -58,11 +58,10 @@ function parseJson<T>(value: string | null): T | null {
 }
 
 export function loadSettings(): UserSettings {
-  const parsed = parseJson<UserSettings>(safeGetItem(STORAGE_KEYS.settings));
+  const parsed = parseJson<Partial<UserSettings>>(safeGetItem(STORAGE_KEYS.settings));
   if (!parsed) return DEFAULT_SETTINGS;
 
   return {
-    units: parsed.units === 'metric' ? 'metric' : 'imperial',
     species: parsed.species ?? DEFAULT_SETTINGS.species,
   };
 }
@@ -103,7 +102,13 @@ export function loadCachedForecast(): ForecastCache | null {
     return null;
   }
 
-  return parsed;
+  return {
+    ...parsed,
+    result: {
+      ...parsed.result,
+      units: 'imperial',
+    },
+  };
 }
 
 export function saveCachedForecast(weather: WeatherForecast, result: ForecastResult): void {

@@ -11,6 +11,7 @@ import { MoonWidget } from '@/components/moon-widget';
 import { OfflineBanner } from '@/components/offline-banner';
 import { useForecast } from '@/components/providers/forecast-provider';
 import { ScoreCard } from '@/components/score-card';
+import { SettingsForm } from '@/components/settings-form';
 import { SolunarCard } from '@/components/solunar-card';
 import { WeatherStrip } from '@/components/weather-strip';
 import { WhyCard } from '@/components/why-card';
@@ -23,6 +24,7 @@ export default function HomePage(): JSX.Element {
     <div className="page-stack">
       <HeroBanner />
       <LocationControls />
+      <SettingsForm />
 
       {isOffline && result ? <OfflineBanner lastUpdated={result.summary.lastUpdatedIso} /> : null}
 
