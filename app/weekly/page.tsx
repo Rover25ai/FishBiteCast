@@ -89,6 +89,7 @@ export default function WeeklyPage(): JSX.Element {
         stepHours={24}
         showDayDate
         showHourInDayDate={false}
+        showHighLowRange
       />
     </div>
   );
