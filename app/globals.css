@@ -90,15 +90,21 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.2rem;
-  min-height: 2.2rem;
+  width: 2.35rem;
+  height: 2.35rem;
+  overflow: hidden;
   border-radius: 0.7rem;
-  background: linear-gradient(135deg, var(--accent-3), #014f65);
-  color: #eef8fc;
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
+  background: #ffffff;
+  border: 1px solid #d6e7ef;
   box-shadow: 0 8px 16px rgba(0, 48, 73, 0.24);
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .brand-kicker {
