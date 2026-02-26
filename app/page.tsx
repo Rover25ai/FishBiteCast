@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { BestWindowsCard } from '@/components/best-windows-card';
 import { ErrorState } from '@/components/error-state';
 import { ForecastSkeleton } from '@/components/forecast-skeleton';
@@ -14,6 +16,7 @@ import { WeatherStrip } from '@/components/weather-strip';
 import { WhyCard } from '@/components/why-card';
 
 export default function HomePage(): JSX.Element {
+  const router = useRouter();
   const { result, loading, error, isOffline, refresh } = useForecast();
 
   return (
@@ -45,7 +48,25 @@ export default function HomePage(): JSX.Element {
               {loading ? 'Refreshing...' : 'Refresh Forecast'}
             </button>
             <p className="helper-text">Last updated: {new Date(result.summary.lastUpdatedIso).toLocaleString()}</p>
-            <a href="/details" className="link-pill">
+            <a
+              href="/details"
+              className="link-pill"
+              onClick={(event) => {
+                if (
+                  event.defaultPrevented ||
+                  event.button !== 0 ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+
+                event.preventDefault();
+                router.push('/details');
+              }}
+            >
               View details
             </a>
           </section>

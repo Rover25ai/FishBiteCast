@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { FactorBreakdown } from '@/components/factor-breakdown';
 import { HourlyChart } from '@/components/hourly-chart';
 import { useForecast } from '@/components/providers/forecast-provider';
 
 export default function DetailsPage(): JSX.Element {
+  const router = useRouter();
   const { result, loading, location, error, refresh } = useForecast();
   const attemptedRefreshRef = useRef<string | null>(null);
 
@@ -45,7 +47,25 @@ export default function DetailsPage(): JSX.Element {
             Retry forecast
           </button>
         ) : null}
-        <a href="/" className="link-pill">
+        <a
+          href="/"
+          className="link-pill"
+          onClick={(event) => {
+            if (
+              event.defaultPrevented ||
+              event.button !== 0 ||
+              event.metaKey ||
+              event.ctrlKey ||
+              event.shiftKey ||
+              event.altKey
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+            router.push('/');
+          }}
+        >
           Back to Home
         </a>
       </section>
