@@ -144,12 +144,13 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
   }
 
   const width = Math.max(chartWidth, 320);
-  const height = 360;
+  const height = width <= 380 ? 286 : width <= 520 ? 320 : 360;
+  const compact = width <= 520;
   const margin = {
-    top: 14,
-    right: 56,
-    bottom: 32,
-    left: 42,
+    top: compact ? 12 : 14,
+    right: compact ? 46 : 56,
+    bottom: compact ? 28 : 32,
+    left: compact ? 36 : 42,
   };
 
   const innerWidth = Math.max(width - margin.left - margin.right, 1);
@@ -172,7 +173,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
   const tempLine = linePath(points, xFor, yForTempWind, 'temperature');
   const windLine = linePath(points, xFor, yForTempWind, 'wind');
 
-  const xTickCount = 6;
+  const xTickCount = width <= 380 ? 4 : width <= 520 ? 5 : 6;
   const xTicks = Array.from({ length: xTickCount }, (_, index) => {
     const ratio = index / (xTickCount - 1);
     const epoch = Math.round(startEpoch + epochSpan * ratio);
@@ -188,7 +189,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
     y: yForScore(value),
   }));
 
-  const rightTickCount = 5;
+  const rightTickCount = width <= 420 ? 4 : 5;
   const rightTicks = Array.from({ length: rightTickCount }, (_, index) => {
     const ratio = index / (rightTickCount - 1);
     const value = tempWindRange.max - ratio * tempWindSpan;
@@ -235,23 +236,23 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
               );
             })}
 
-            <path d={rainArea} fill="url(#rainFillNative)" stroke="#2b9ec4" strokeWidth="1.4" />
-            <path d={scoreLine} fill="none" stroke="#ee8a03" strokeWidth="3.2" strokeLinecap="round" />
-            <path d={tempLine} fill="none" stroke="#028090" strokeWidth="2.1" strokeLinecap="round" />
-            <path d={windLine} fill="none" stroke="#003049" strokeWidth="2.1" strokeLinecap="round" />
+            <path d={rainArea} fill="url(#rainFillNative)" stroke="#2b9ec4" strokeWidth={compact ? '1.2' : '1.4'} />
+            <path d={scoreLine} fill="none" stroke="#ee8a03" strokeWidth={compact ? '2.8' : '3.2'} strokeLinecap="round" />
+            <path d={tempLine} fill="none" stroke="#028090" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
+            <path d={windLine} fill="none" stroke="#003049" strokeWidth={compact ? '1.9' : '2.1'} strokeLinecap="round" />
 
             <line x1={margin.left} x2={margin.left} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
             <line x1={width - margin.right} x2={width - margin.right} y1={margin.top} y2={height - margin.bottom} stroke="#6f92a2" />
             <line x1={margin.left} x2={width - margin.right} y1={height - margin.bottom} y2={height - margin.bottom} stroke="#6f92a2" />
 
             {scoreTicks.map((tick) => (
-              <text key={`left-${tick.value}`} x={margin.left - 8} y={tick.y + 4} textAnchor="end" fill="#2f4f5b" fontSize="12">
+              <text key={`left-${tick.value}`} x={margin.left - 8} y={tick.y + 4} textAnchor="end" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
                 {tick.value}
               </text>
             ))}
 
             {rightTicks.map((tick, index) => (
-              <text key={`right-${index}`} x={width - margin.right + 8} y={tick.y + 4} textAnchor="start" fill="#2f4f5b" fontSize="12">
+              <text key={`right-${index}`} x={width - margin.right + 8} y={tick.y + 4} textAnchor="start" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
                 {tick.value.toFixed(1)}
               </text>
             ))}
@@ -259,7 +260,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
             {xTicks.map((tick, index) => (
               <g key={`x-${index}`}>
                 <line x1={tick.x} x2={tick.x} y1={height - margin.bottom} y2={height - margin.bottom + 5} stroke="#6f92a2" />
-                <text x={tick.x} y={height - margin.bottom + 18} textAnchor="middle" fill="#2f4f5b" fontSize="12">
+                <text x={tick.x} y={height - margin.bottom + (compact ? 16 : 18)} textAnchor="middle" fill="#2f4f5b" fontSize={compact ? '11' : '12'}>
                   {tick.label}
                 </text>
               </g>

@@ -17,10 +17,13 @@ export function FactorBreakdown({ result }: { result: ForecastResult }): JSX.Ele
           <tbody>
             {result.factorBreakdown.map((factor) => (
               <tr key={factor.factor}>
-                <td>{factor.label}</td>
-                <td>{(factor.weight * 100).toFixed(0)}%</td>
-                <td className={factor.points >= 0 ? 'positive' : 'negative'}>{factor.points >= 0 ? '+' : ''}{factor.points.toFixed(1)}</td>
-                <td>{factor.insight}</td>
+                <td data-label="Factor">{factor.label}</td>
+                <td data-label="Weight">{(factor.weight * 100).toFixed(0)}%</td>
+                <td data-label="Contribution" className={factor.points >= 0 ? 'positive' : 'negative'}>
+                  {factor.points >= 0 ? '+' : ''}
+                  {factor.points.toFixed(1)}
+                </td>
+                <td data-label="Interpretation">{factor.insight}</td>
               </tr>
             ))}
           </tbody>
