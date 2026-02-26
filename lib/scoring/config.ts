@@ -85,6 +85,30 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       preferredTempRangeC: [15, 26],
       moonInfluence: 0.9,
     },
+    whiteBass: {
+      label: 'White Bass',
+      weights: {
+        ...baseWeights,
+        wind: 0.22,
+        temperature: 0.14,
+        moon: 0.04,
+      },
+      preferredTempRangeC: [14, 24],
+      moonInfluence: 0.8,
+    },
+    striper: {
+      label: 'Striper (Striped Bass)',
+      weights: {
+        ...baseWeights,
+        pressureLevel: 0.11,
+        wind: 0.23,
+        precipitation: 0.14,
+        cloudCover: 0.09,
+        temperature: 0.14,
+      },
+      preferredTempRangeC: [13, 24],
+      moonInfluence: 0.85,
+    },
     crappie: {
       label: 'Crappie',
       weights: {

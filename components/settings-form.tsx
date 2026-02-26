@@ -4,6 +4,8 @@ import { useSettings } from '@/components/providers/settings-provider';
 
 const speciesOptions = [
   { id: 'bass', label: 'Bass' },
+  { id: 'whiteBass', label: 'White Bass' },
+  { id: 'striper', label: 'Striper' },
   { id: 'crappie', label: 'Crappie' },
   { id: 'trout', label: 'Trout' },
   { id: 'catfish', label: 'Catfish' },

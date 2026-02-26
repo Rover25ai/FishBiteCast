@@ -1,6 +1,6 @@
 export type UnitSystem = 'metric' | 'imperial';
 
-export type SpeciesPreset = 'bass' | 'crappie' | 'trout' | 'catfish' | 'walleye' | 'bream';
+export type SpeciesPreset = 'bass' | 'whiteBass' | 'striper' | 'crappie' | 'trout' | 'catfish' | 'walleye' | 'bream';
 
 export interface UserSettings {
   units: UnitSystem;
