@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
+
 import {
   Area,
   CartesianGrid,
@@ -7,7 +9,6 @@ import {
   Legend,
   Line,
   ReferenceArea,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -45,32 +46,79 @@ function convertPressure(value: number, units: ForecastResult['units']): number 
 }
 
 export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
+  const chartWrapRef = useRef<HTMLDivElement | null>(null);
+  const [chartWidth, setChartWidth] = useState(0);
+
   const temperatureUnit = result.units === 'imperial' ? '°F' : '°C';
   const windUnit = result.units === 'imperial' ? 'mph' : 'km/h';
   const pressureUnit = result.units === 'imperial' ? 'inHg' : 'hPa';
 
-  const data = result.hourly.slice(0, 48).map((hour) => ({
-    epoch: hour.epoch,
-    score: Number(hour.score.toFixed(1)),
-    precipitation: Math.round(hour.inputs.precipitationProbability),
-    temperature: Number(convertTemp(hour.inputs.temperatureC, result.units).toFixed(1)),
-    wind: Number(convertWind(hour.inputs.windSpeedKmh, result.units).toFixed(1)),
-    pressure: Number(convertPressure(hour.inputs.pressureHpa, result.units).toFixed(2)),
-  }));
+  useEffect(() => {
+    const updateChartWidth = (): void => {
+      const nextWidth = Math.round(chartWrapRef.current?.getBoundingClientRect().width ?? 0);
+      if (nextWidth > 0) {
+        setChartWidth(nextWidth);
+      }
+    };
+
+    updateChartWidth();
+    const frame = window.requestAnimationFrame(updateChartWidth);
+
+    const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateChartWidth);
+    if (resizeObserver && chartWrapRef.current) {
+      resizeObserver.observe(chartWrapRef.current);
+    }
+
+    window.addEventListener('resize', updateChartWidth);
+    window.addEventListener('orientationchange', updateChartWidth);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', updateChartWidth);
+      window.removeEventListener('orientationchange', updateChartWidth);
+      resizeObserver?.disconnect();
+    };
+  }, []);
+
+  const data = useMemo(
+    () =>
+      result.hourly
+        .slice(0, 48)
+        .map((hour) => ({
+          epoch: Number.isFinite(hour.epoch) ? hour.epoch : 0,
+          score: Number.isFinite(hour.score) ? Number(hour.score.toFixed(1)) : 0,
+          precipitation: Number.isFinite(hour.inputs.precipitationProbability)
+            ? Math.round(hour.inputs.precipitationProbability)
+            : 0,
+          temperature: Number.isFinite(hour.inputs.temperatureC)
+            ? Number(convertTemp(hour.inputs.temperatureC, result.units).toFixed(1))
+            : 0,
+          wind: Number.isFinite(hour.inputs.windSpeedKmh)
+            ? Number(convertWind(hour.inputs.windSpeedKmh, result.units).toFixed(1))
+            : 0,
+          pressure: Number.isFinite(hour.inputs.pressureHpa)
+            ? Number(convertPressure(hour.inputs.pressureHpa, result.units).toFixed(2))
+            : 0,
+        }))
+        .filter((hour) => hour.epoch > 0),
+    [result.hourly, result.units],
+  );
 
   const chartStart = data[0]?.epoch ?? 0;
   const chartEnd = data[data.length - 1]?.epoch ?? 0;
   const solunarInChartRange = result.solunar.windows.filter(
     (window) => window.endEpoch >= chartStart && window.startEpoch <= chartEnd,
   );
+  const effectiveWidth = Math.max(chartWidth, 320);
+  const canRenderChart = data.length > 0 && chartWidth > 0;
 
   return (
     <section className="card chart-card">
       <h2 className="section-title">48h Hourly Forecast + Bite Score</h2>
       <p className="chart-kicker">Amber shading marks major solunar windows. Mint shading marks minor windows.</p>
-      <div className="chart-wrap">
-        <ResponsiveContainer width="100%" height={360}>
-          <ComposedChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
+      <div className="chart-wrap" ref={chartWrapRef}>
+        {canRenderChart ? (
+          <ComposedChart width={effectiveWidth} height={360} data={data} margin={{ top: 8, right: 24, left: 0, bottom: 8 }}>
             <defs>
               <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#45b9de" stopOpacity={0.44} />
@@ -109,12 +157,14 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
               />
             ))}
             <Area yAxisId="score" dataKey="precipitation" name="Rain %" fill="url(#rainFill)" stroke="#2b9ec4" strokeWidth={1.4} />
-            <Line yAxisId="score" type="monotone" dataKey="score" name="Bite Score" stroke="#ee8a03" strokeWidth={3.2} dot={false} />
-            <Line yAxisId="tempWind" type="monotone" dataKey="temperature" name={`Temp (${temperatureUnit})`} stroke="#028090" strokeWidth={2.1} dot={false} />
-            <Line yAxisId="tempWind" type="monotone" dataKey="wind" name={`Wind (${windUnit})`} stroke="#003049" strokeWidth={2.1} dot={false} />
+            <Line yAxisId="score" type="monotone" dataKey="score" name="Bite Score" stroke="#ee8a03" strokeWidth={3.2} dot={false} isAnimationActive={false} />
+            <Line yAxisId="tempWind" type="monotone" dataKey="temperature" name={`Temp (${temperatureUnit})`} stroke="#028090" strokeWidth={2.1} dot={false} isAnimationActive={false} />
+            <Line yAxisId="tempWind" type="monotone" dataKey="wind" name={`Wind (${windUnit})`} stroke="#003049" strokeWidth={2.1} dot={false} isAnimationActive={false} />
             <Line yAxisId="pressure" type="monotone" dataKey="pressure" name={`Pressure (${pressureUnit})`} stroke="#5b6f7a" dot={false} strokeDasharray="3 3" />
           </ComposedChart>
-        </ResponsiveContainer>
+        ) : (
+          <p className="helper-text">Preparing chart...</p>
+        )}
       </div>
     </section>
   );
