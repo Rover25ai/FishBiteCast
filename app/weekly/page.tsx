@@ -82,7 +82,14 @@ export default function WeeklyPage(): JSX.Element {
         ariaLabel="7 day hourly fishing forecast chart"
       />
       <FactorBreakdown result={result} />
-      <WeatherStrip result={result} />
+      <WeatherStrip
+        result={result}
+        title="Next 7 Days"
+        horizonHours={24 * 7}
+        stepHours={24}
+        showDayDate
+        showHourInDayDate={false}
+      />
     </div>
   );
 }

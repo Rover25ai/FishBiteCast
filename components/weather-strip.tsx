@@ -7,6 +7,7 @@ interface WeatherStripProps {
   horizonHours?: number;
   stepHours?: number;
   showDayDate?: boolean;
+  showHourInDayDate?: boolean;
 }
 
 export function WeatherStrip({
@@ -15,6 +16,7 @@ export function WeatherStrip({
   horizonHours = 8,
   stepHours = 1,
   showDayDate = false,
+  showHourInDayDate = true,
 }: WeatherStripProps): JSX.Element {
   const nowEpoch = Math.floor(Date.now() / 1000);
   const firstFutureIndex = result.hourly.findIndex((hour) => hour.epoch >= nowEpoch);
@@ -41,7 +43,7 @@ export function WeatherStrip({
                     weekday: 'short',
                     month: 'short',
                     day: 'numeric',
-                    hour: 'numeric',
+                    ...(showHourInDayDate ? { hour: 'numeric' as const } : {}),
                   })
                 : formatHour(hour.epoch, result.timezone)}
             </p>
