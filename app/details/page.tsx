@@ -77,7 +77,12 @@ export default function DetailsPage(): JSX.Element {
     <div className="page-stack">
       <HourlyChart result={result} />
       <FactorBreakdown result={result} />
-      <WeatherStrip result={result} />
+      <WeatherStrip
+        result={result}
+        title="Next 48 Hours (6h steps, local to selected location)"
+        horizonHours={48}
+        stepHours={6}
+      />
     </div>
   );
 }
