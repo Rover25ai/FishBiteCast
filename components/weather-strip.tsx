@@ -1,4 +1,4 @@
-import { formatHour, formatTemperature, formatWind } from '@/lib/format';
+import { formatDateTime, formatHour, formatTemperature, formatWind } from '@/lib/format';
 import type { ForecastResult } from '@/types/forecast';
 
 interface WeatherStripProps {
@@ -6,6 +6,7 @@ interface WeatherStripProps {
   title?: string;
   horizonHours?: number;
   stepHours?: number;
+  showDayDate?: boolean;
 }
 
 export function WeatherStrip({
@@ -13,6 +14,7 @@ export function WeatherStrip({
   title = 'Next Hours (local to selected location)',
   horizonHours = 8,
   stepHours = 1,
+  showDayDate = false,
 }: WeatherStripProps): JSX.Element {
   const nowEpoch = Math.floor(Date.now() / 1000);
   const firstFutureIndex = result.hourly.findIndex((hour) => hour.epoch >= nowEpoch);
@@ -33,7 +35,16 @@ export function WeatherStrip({
       <div className="weather-strip" role="list" aria-label="Hourly weather strip">
         {nextHours.map((hour) => (
           <article className="weather-chip" key={hour.epoch} role="listitem">
-            <p className="weather-time">{formatHour(hour.epoch, result.timezone)}</p>
+            <p className="weather-time">
+              {showDayDate
+                ? formatDateTime(hour.epoch, result.timezone, {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                  })
+                : formatHour(hour.epoch, result.timezone)}
+            </p>
             <p className="weather-main">{formatTemperature(hour.inputs.temperatureC, result.units)}</p>
             <p className="weather-sub">Wind {formatWind(hour.inputs.windSpeedKmh, result.units)}</p>
             <p className="weather-sub">Rain {Math.round(hour.inputs.precipitationProbability)}%</p>

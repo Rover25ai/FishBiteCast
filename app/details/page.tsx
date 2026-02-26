@@ -79,9 +79,10 @@ export default function DetailsPage(): JSX.Element {
       <FactorBreakdown result={result} />
       <WeatherStrip
         result={result}
-        title="Next 48 Hours (6h steps, local to selected location)"
+        title="Next 48 Hours"
         horizonHours={48}
         stepHours={6}
+        showDayDate
       />
     </div>
   );
