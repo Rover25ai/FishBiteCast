@@ -7,6 +7,9 @@ import type { ForecastResult } from '@/types/forecast';
 
 interface HourlyChartProps {
   result: ForecastResult;
+  horizonHours?: number;
+  title?: string;
+  ariaLabel?: string;
 }
 
 interface ChartPoint {
@@ -83,7 +86,12 @@ function rangeWithPadding(values: number[], ratio = 0.12): { min: number; max: n
   };
 }
 
-export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
+export function HourlyChart({
+  result,
+  horizonHours = 48,
+  title = '48h Hourly Forecast + Bite Score',
+  ariaLabel = '48 hour hourly fishing forecast chart',
+}: HourlyChartProps): JSX.Element {
   const chartWrapRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
 
@@ -128,7 +136,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
   const points = useMemo(
     () =>
       result.hourly
-        .slice(0, 48)
+        .slice(0, horizonHours)
         .map((hour) => ({
           epoch: toFinite(hour.epoch, 0),
           score: toFinite(Number(hour.score.toFixed(1)), 0),
@@ -137,7 +145,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
           wind: toFinite(Number(convertWind(hour.inputs.windSpeedKmh, result.units).toFixed(1)), 0),
         }))
         .filter((point) => point.epoch > 0),
-    [result.hourly, result.units],
+    [horizonHours, result.hourly, result.units],
   );
 
   const hasData = points.length > 1;
@@ -145,7 +153,7 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
   if (!hasData) {
     return (
       <section className="card chart-card">
-        <h2 className="section-title">48h Hourly Forecast + Bite Score</h2>
+        <h2 className="section-title">{title}</h2>
         <p className="helper-text">Not enough hourly data to draw the chart yet.</p>
       </section>
     );
@@ -182,14 +190,21 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
   const tempLine = linePath(points, xFor, yForTempWind, 'temperature');
   const windLine = linePath(points, xFor, yForTempWind, 'wind');
 
-  const xTickCount = width <= 380 ? 4 : width <= 520 ? 5 : 6;
+  const longRange = horizonHours > 72;
+  const xTickCount = width <= 380 ? 4 : width <= 520 ? 5 : longRange ? 7 : 6;
   const xTicks = Array.from({ length: xTickCount }, (_, index) => {
     const ratio = index / (xTickCount - 1);
     const epoch = Math.round(startEpoch + epochSpan * ratio);
+    const label = longRange
+      ? new Intl.DateTimeFormat('en-US', {
+          timeZone: result.timezone,
+          weekday: 'short',
+        }).format(new Date(epoch * 1000))
+      : formatHour(epoch, result.timezone);
     return {
       epoch,
       x: xFor(epoch),
-      label: formatHour(epoch, result.timezone),
+      label,
     };
   });
 
@@ -214,10 +229,10 @@ export function HourlyChart({ result }: HourlyChartProps): JSX.Element {
 
   return (
     <section className="card chart-card">
-      <h2 className="section-title">48h Hourly Forecast + Bite Score</h2>
+      <h2 className="section-title">{title}</h2>
       <p className="chart-kicker">Amber shading marks major solunar windows. Mint shading marks minor windows.</p>
       <div className="chart-wrap" ref={chartWrapRef}>
-        <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="48 hour hourly fishing forecast chart">
+        <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel}>
           <defs>
             <linearGradient id="rainFillNative" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#45b9de" stopOpacity="0.44" />
