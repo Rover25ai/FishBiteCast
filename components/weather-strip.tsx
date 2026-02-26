@@ -88,7 +88,12 @@ export function WeatherStrip({
                       return formatTemperature(hour.inputs.temperatureC, result.units);
                     }
 
-                    return `H ${formatTemperature(range.highC, result.units)} / L ${formatTemperature(range.lowC, result.units)}`;
+                    return (
+                      <>
+                        <span className="weather-main-line">H {formatTemperature(range.highC, result.units)}</span>
+                        <span className="weather-main-line">L {formatTemperature(range.lowC, result.units)}</span>
+                      </>
+                    );
                   })()
                 : formatTemperature(hour.inputs.temperatureC, result.units)}
             </p>

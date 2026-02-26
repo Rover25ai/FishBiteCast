@@ -473,6 +473,11 @@ body::before {
   font-weight: 700;
 }
 
+.weather-main-line {
+  display: block;
+  line-height: 1.15;
+}
+
 .weather-sub,
 .weather-score {
   margin: 0;
