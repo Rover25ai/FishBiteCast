@@ -530,6 +530,50 @@ body::before {
   height: 360px;
 }
 
+.chart-svg {
+  width: 100%;
+  height: 360px;
+  display: block;
+}
+
+.chart-legend {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  color: var(--muted-soft);
+  font-size: 0.8rem;
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.legend-dot {
+  width: 0.68rem;
+  height: 0.68rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend-score {
+  background: #ee8a03;
+}
+
+.legend-temp {
+  background: #028090;
+}
+
+.legend-wind {
+  background: #003049;
+}
+
+.legend-rain {
+  background: #2b9ec4;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
