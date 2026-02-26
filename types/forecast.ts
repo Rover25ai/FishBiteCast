@@ -8,7 +8,8 @@ export type FactorKey =
   | 'precipitation'
   | 'cloudCover'
   | 'temperature'
-  | 'moon';
+  | 'moon'
+  | 'speciesBehavior';
 
 export type RatingLabel = 'Poor' | 'Fair' | 'Good' | 'Great' | 'Epic';
 

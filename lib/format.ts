@@ -44,6 +44,16 @@ export function epochHourInTimezone(epochSeconds: number, timeZone: string): num
   return Number.parseInt(hourPart, 10);
 }
 
+export function epochMonthInTimezone(epochSeconds: number, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    month: 'numeric',
+  }).formatToParts(new Date(epochSeconds * 1000));
+
+  const monthPart = parts.find((part) => part.type === 'month')?.value ?? '1';
+  return Number.parseInt(monthPart, 10);
+}
+
 export function formatTemperature(tempC: number, units: UnitSystem): string {
   if (units === 'imperial') {
     return `${Math.round((tempC * 9) / 5 + 32)}°F`;

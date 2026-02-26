@@ -27,6 +27,15 @@ export interface SpeciesConfig {
   weights: FactorWeights;
   preferredTempRangeC: [number, number];
   moonInfluence: number;
+  behavior: SpeciesBehaviorConfig;
+}
+
+export interface SpeciesBehaviorConfig {
+  spawnMonths: number[];
+  spawnTempRangeC: [number, number];
+  feedingWindows: Array<[number, number]>;
+  lowLightPreference: 'low' | 'moderate' | 'high';
+  nightFeedingBoost?: boolean;
 }
 
 export interface ForecastConfig {
@@ -35,13 +44,14 @@ export interface ForecastConfig {
 }
 
 const baseWeights: FactorWeights = {
-  pressureTrend: 0.24,
-  pressureLevel: 0.12,
-  wind: 0.2,
-  precipitation: 0.16,
+  pressureTrend: 0.22,
+  pressureLevel: 0.11,
+  wind: 0.19,
+  precipitation: 0.15,
   cloudCover: 0.08,
-  temperature: 0.15,
-  moon: 0.05,
+  temperature: 0.14,
+  moon: 0.04,
+  speciesBehavior: 0.07,
 };
 
 export const FACTOR_LABELS: Record<FactorKey, string> = {
@@ -52,6 +62,7 @@ export const FACTOR_LABELS: Record<FactorKey, string> = {
   cloudCover: 'Cloud Cover',
   temperature: 'Temperature Stability',
   moon: 'Moon Phase',
+  speciesBehavior: 'Species Behavior',
 };
 
 export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
@@ -84,6 +95,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [15, 26],
       moonInfluence: 0.9,
+      behavior: {
+        spawnMonths: [4, 5, 6],
+        spawnTempRangeC: [15, 21],
+        feedingWindows: [
+          [5, 9],
+          [17, 21],
+        ],
+        lowLightPreference: 'moderate',
+      },
     },
     whiteBass: {
       label: 'White Bass',
@@ -95,6 +115,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [14, 24],
       moonInfluence: 0.8,
+      behavior: {
+        spawnMonths: [3, 4, 5],
+        spawnTempRangeC: [12, 19],
+        feedingWindows: [
+          [5, 8],
+          [18, 22],
+        ],
+        lowLightPreference: 'moderate',
+      },
     },
     striper: {
       label: 'Striper (Striped Bass)',
@@ -108,6 +137,16 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [13, 24],
       moonInfluence: 0.85,
+      behavior: {
+        spawnMonths: [4, 5, 6],
+        spawnTempRangeC: [15, 22],
+        feedingWindows: [
+          [4, 8],
+          [18, 23],
+        ],
+        lowLightPreference: 'high',
+        nightFeedingBoost: true,
+      },
     },
     crappie: {
       label: 'Crappie',
@@ -119,6 +158,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [12, 24],
       moonInfluence: 0.75,
+      behavior: {
+        spawnMonths: [4, 5, 6],
+        spawnTempRangeC: [14, 20],
+        feedingWindows: [
+          [6, 10],
+          [16, 20],
+        ],
+        lowLightPreference: 'moderate',
+      },
     },
     trout: {
       label: 'Trout',
@@ -131,6 +179,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [8, 18],
       moonInfluence: 0.6,
+      behavior: {
+        spawnMonths: [9, 10, 11],
+        spawnTempRangeC: [7, 13],
+        feedingWindows: [
+          [6, 9],
+          [17, 20],
+        ],
+        lowLightPreference: 'moderate',
+      },
     },
     catfish: {
       label: 'Catfish',
@@ -142,6 +199,16 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [18, 30],
       moonInfluence: 1,
+      behavior: {
+        spawnMonths: [5, 6, 7],
+        spawnTempRangeC: [21, 29],
+        feedingWindows: [
+          [20, 23],
+          [0, 4],
+        ],
+        lowLightPreference: 'high',
+        nightFeedingBoost: true,
+      },
     },
     walleye: {
       label: 'Walleye',
@@ -155,6 +222,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [10, 21],
       moonInfluence: 0.9,
+      behavior: {
+        spawnMonths: [3, 4, 5],
+        spawnTempRangeC: [6, 13],
+        feedingWindows: [
+          [4, 8],
+          [17, 22],
+        ],
+        lowLightPreference: 'high',
+      },
     },
     bream: {
       label: 'Bream (Bluegill/Sunfish)',
@@ -168,6 +244,15 @@ export const DEFAULT_FORECAST_CONFIG: ForecastConfig = {
       },
       preferredTempRangeC: [16, 28],
       moonInfluence: 0.7,
+      behavior: {
+        spawnMonths: [5, 6, 7, 8],
+        spawnTempRangeC: [20, 29],
+        feedingWindows: [
+          [6, 10],
+          [16, 20],
+        ],
+        lowLightPreference: 'low',
+      },
     },
   },
 };

@@ -1,6 +1,12 @@
 import { computeMoonInfo } from '@/lib/moon';
-import { average, clamp, epochHourInTimezone, formatHourRange } from '@/lib/format';
-import { DEFAULT_FORECAST_CONFIG, FACTOR_LABELS, type FactorWeights, type ForecastConfig } from '@/lib/scoring/config';
+import { average, clamp, epochHourInTimezone, epochMonthInTimezone, formatHourRange } from '@/lib/format';
+import {
+  DEFAULT_FORECAST_CONFIG,
+  FACTOR_LABELS,
+  type FactorWeights,
+  type ForecastConfig,
+  type SpeciesBehaviorConfig,
+} from '@/lib/scoring/config';
 import { buildSolunarSummary } from '@/lib/solunar';
 import type {
   BestWindow,
@@ -97,6 +103,85 @@ function scoreMoon(epoch: number, moonInfluence: number): number {
   return clamp(score * moonInfluence, -1, 1);
 }
 
+function isHourInWindow(hour: number, start: number, end: number): boolean {
+  if (start <= end) {
+    return hour >= start && hour <= end;
+  }
+
+  return hour >= start || hour <= end;
+}
+
+function distanceToWindow(hour: number, start: number, end: number): number {
+  if (isHourInWindow(hour, start, end)) {
+    return 0;
+  }
+
+  const points = [start, end, start + 24, end + 24];
+  return Math.min(
+    ...points.map((point) => {
+      const wrappedHour = hour <= point ? hour + 24 : hour;
+      return Math.abs(wrappedHour - point);
+    }),
+  );
+}
+
+function monthDistance(monthA: number, monthB: number): number {
+  const direct = Math.abs(monthA - monthB);
+  return Math.min(direct, 12 - direct);
+}
+
+function scoreSpeciesBehavior(tempC: number, localHour: number, localMonth: number, behavior: SpeciesBehaviorConfig): number {
+  const inSpawnMonth = behavior.spawnMonths.includes(localMonth);
+  const nearSpawnMonth = behavior.spawnMonths.some((month) => monthDistance(month, localMonth) === 1);
+
+  let spawnMonthScore = -0.08;
+  if (inSpawnMonth) {
+    spawnMonthScore = 0.32;
+  } else if (nearSpawnMonth) {
+    spawnMonthScore = 0.12;
+  }
+
+  const [spawnMin, spawnMax] = behavior.spawnTempRangeC;
+  const below = spawnMin - tempC;
+  const above = tempC - spawnMax;
+  const tempDistance = Math.max(0, below, above);
+
+  let spawnTempScore = -0.22;
+  if (tempDistance === 0) {
+    spawnTempScore = 0.35;
+  } else if (tempDistance <= 2) {
+    spawnTempScore = 0.14;
+  } else if (tempDistance <= 4) {
+    spawnTempScore = -0.05;
+  }
+
+  const inFeedingWindow = behavior.feedingWindows.some(([start, end]) => isHourInWindow(localHour, start, end));
+  const nearFeedingWindow = behavior.feedingWindows.some(([start, end]) => distanceToWindow(localHour, start, end) <= 1);
+
+  let feedingWindowScore = -0.1;
+  if (inFeedingWindow) {
+    feedingWindowScore = 0.34;
+  } else if (nearFeedingWindow) {
+    feedingWindowScore = 0.14;
+  }
+
+  const isMidday = localHour >= 11 && localHour <= 15;
+  const isNight = localHour >= 20 || localHour <= 4;
+
+  let lightScore = 0;
+  if (behavior.lowLightPreference === 'high') {
+    if (isMidday) lightScore -= 0.2;
+    if (isNight) lightScore += behavior.nightFeedingBoost ? 0.18 : 0.08;
+  } else if (behavior.lowLightPreference === 'moderate') {
+    if (isMidday) lightScore -= 0.08;
+    if (isNight) lightScore += behavior.nightFeedingBoost ? 0.12 : 0.04;
+  } else if (isMidday) {
+    lightScore += 0.05;
+  }
+
+  return clamp(spawnMonthScore + spawnTempScore + feedingWindowScore + lightScore, -1, 1);
+}
+
 function toRating(score: number): RatingLabel {
   if (score < 30) return 'Poor';
   if (score < 50) return 'Fair';
@@ -123,6 +208,10 @@ function insightForFactor(factor: FactorKey, points: number): string {
       return positive ? 'Water temperature pattern looks stable for feeding.' : 'Abrupt temperature swings may slow activity.';
     case 'moon':
       return positive ? 'Moon phase offers a small tailwind.' : 'Moon phase impact is limited at this time.';
+    case 'speciesBehavior':
+      return positive
+        ? 'Seasonal behavior and feeding windows line up for this species.'
+        : 'Current timing is outside this species typical spawn/feeding pattern.';
     default:
       return 'Mixed impact.';
   }
@@ -146,6 +235,8 @@ function whyLine(factor: FactorContribution): string {
       return positive ? 'Moon phase gives a modest boost.' : 'Moon phase is neutral to weak.';
     case 'pressureLevel':
       return positive ? 'Pressure level is close to ideal.' : 'Pressure level is less favorable right now.';
+    case 'speciesBehavior':
+      return positive ? 'Species feeding/spawn timing is favorable.' : 'Species is likely in a less active seasonal/feeding phase.';
     default:
       return factor.insight;
   }
@@ -261,6 +352,7 @@ export function buildForecastScore({ forecast, location, settings, config = DEFA
     const tempChange = i >= 3 ? Math.abs(temp - forecast.hourly.temperature2m[i - 3]) : 0;
     const pressureTrend = i >= 3 ? pressure - forecast.hourly.pressure[i - 3] : 0;
     const localHour = epochHourInTimezone(epoch, forecast.timezone);
+    const localMonth = epochMonthInTimezone(epoch, forecast.timezone);
 
     const normalized: Record<FactorKey, number> = {
       pressureTrend: scorePressureTrend(pressureTrend, t.pressureTrendGoodRange, t.pressureTrendBadRiseHpa, t.pressureTrendBadDropHpa),
@@ -270,6 +362,7 @@ export function buildForecastScore({ forecast, location, settings, config = DEFA
       cloudCover: scoreCloud(cloud, localHour, t.cloudGoodRangePct),
       temperature: scoreTemperature(temp, tempChange, species.preferredTempRangeC, t.temperatureStableDeltaC, t.temperatureSwingDeltaC),
       moon: scoreMoon(epoch, species.moonInfluence),
+      speciesBehavior: scoreSpeciesBehavior(temp, localHour, localMonth, species.behavior),
     };
 
     const contributions = (Object.keys(species.weights) as FactorKey[]).reduce((acc, factor) => {

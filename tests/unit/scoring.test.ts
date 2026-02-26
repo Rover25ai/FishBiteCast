@@ -1,8 +1,7 @@
 import { buildForecastScore } from '@/lib/scoring/engine';
 import type { LocationInfo, WeatherForecast } from '@/types/forecast';
 
-function makeForecast(overrides?: Partial<WeatherForecast['hourly']>): WeatherForecast {
-  const start = Math.floor(Date.now() / 3600000) * 3600;
+function makeForecast(overrides?: Partial<WeatherForecast['hourly']>, start = 1715774400): WeatherForecast {
   const hours = 48;
 
   const hourly = {
@@ -83,5 +82,50 @@ describe('buildForecastScore', () => {
     });
 
     expect(Math.abs(scoreA.summary.totalScore - scoreB.summary.totalScore)).toBeLessThanOrEqual(8);
+  });
+
+  it('applies species behavior boost for feeding windows and spawn timing', () => {
+    const catfishNight = makeForecast(undefined, Math.floor(new Date('2024-06-20T08:00:00.000Z').getTime() / 1000));
+    const catfishMidday = makeForecast(undefined, Math.floor(new Date('2024-06-20T19:00:00.000Z').getTime() / 1000));
+
+    const catfishNightScore = buildForecastScore({
+      forecast: catfishNight,
+      location,
+      settings: { species: 'catfish' },
+      now: new Date('2024-06-20T08:00:00.000Z'),
+    });
+
+    const catfishMiddayScore = buildForecastScore({
+      forecast: catfishMidday,
+      location,
+      settings: { species: 'catfish' },
+      now: new Date('2024-06-20T19:00:00.000Z'),
+    });
+
+    const catfishNightBehavior = catfishNightScore.hourly[0].contributions.speciesBehavior;
+    const catfishMiddayBehavior = catfishMiddayScore.hourly[0].contributions.speciesBehavior;
+    expect(catfishNightBehavior).toBeGreaterThan(catfishMiddayBehavior + 2);
+
+    const bassSpawnSeason = makeForecast(undefined, Math.floor(new Date('2024-05-20T12:00:00.000Z').getTime() / 1000));
+    const bassOffSeason = makeForecast(undefined, Math.floor(new Date('2024-01-20T12:00:00.000Z').getTime() / 1000));
+
+    const bassSpawnScore = buildForecastScore({
+      forecast: bassSpawnSeason,
+      location,
+      settings: { species: 'bass' },
+      now: new Date('2024-05-20T12:00:00.000Z'),
+    });
+
+    const bassOffScore = buildForecastScore({
+      forecast: bassOffSeason,
+      location,
+      settings: { species: 'bass' },
+      now: new Date('2024-01-20T12:00:00.000Z'),
+    });
+
+    const bassSpawnBehavior = bassSpawnScore.hourly[0].contributions.speciesBehavior;
+    const bassOffBehavior = bassOffScore.hourly[0].contributions.speciesBehavior;
+    expect(bassSpawnBehavior).toBeGreaterThan(bassOffBehavior + 1);
+    expect(bassSpawnScore.factorBreakdown.some((factor) => factor.factor === 'speciesBehavior')).toBe(true);
   });
 });
